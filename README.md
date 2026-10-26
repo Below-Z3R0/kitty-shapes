@@ -8,14 +8,31 @@ hexágono, arco, semicírculo…— y el shell **rota** entre ellas en cada arra
 (nunca repite la anterior). Siempre la misma imagen, silueta distinta.
 
 ```
-install.sh        # instalador: deps, binario, configs y enganche de fish
+install.sh        # bootstrap: compila o baja el release y delega en `kitty-shapes install`
 src/
+├── cli/          # la línea de órdenes, un módulo por tema
+│   ├── index.ts  # el dispatcher
+│   ├── build.ts  # build: un PNG por forma + manifest.json
+│   ├── pick.ts   # pick: un emblema por stdout
+│   ├── install.ts# install / uninstall (binario, configs, fish)
+│   ├── update.ts # baja el release y se reemplaza
+│   ├── bundle.ts # (mantenedor) arma dist/ para el release
+│   ├── doctor.ts # chequeos del entorno
+│   ├── version.ts
+│   ├── args.ts   # parseo de flags y listas de formas
+│   ├── prepare.ts# decodificar, detectar, recortar, tamaño y foco
+│   ├── palette.ts# cuantización del PNG final
+│   ├── canvas.ts # carga de Skia bajo demanda
+│   ├── files.ts  # rutas, copia con backup, mapa de archivos
+│   ├── fish.ts   # el enganche del greeting
+│   ├── output.ts # ✓ / ! / ✗ con color solo en TTY
+│   ├── manifest.ts
+│   └── usage.ts
 ├── geometry.ts   # geometría pura: polígonos, estrellas, fillets (sin canvas)
 ├── shapes.ts     # las recetas de Material 3
 ├── detect.ts     # detecta la lámina y el sujeto solos
 ├── render.ts     # dibuja con Canvas2D y recorta por la forma
 ├── quantize.ts   # cuantización de color (PNG más ligero)
-└── cli.ts        # la línea de órdenes
 docs/
 ├── ARQUITECTURA.md  # qué hace cada archivo y cada función del script
 ├── FLUJO.md         # los flujos: arranque, render, re-render, cache, watcher
@@ -26,7 +43,8 @@ docs/
 tests/
 ├── geometry.test.ts   # geometría, formas y máscara
 ├── detect.test.ts     # lámina/sujeto (incluye alfa)
-└── quantize.test.ts   # paleta, color medio y alfa
+├── quantize.test.ts   # paleta, color medio y alfa
+└── args.test.ts       # parseo de flags y validación de formas
 examples/
 ├── fastfetch-kitty.sh      # el script de fastfetch, listo para copiar
 ├── fastfetch-config.jsonc  # la config de fastfetch, lista para copiar
@@ -51,36 +69,69 @@ examples/
 | [`examples/emblem-shapes.txt`](examples/emblem-shapes.txt) | La lista de formas, editable |
 | [`examples/noctalia-avatar-check.sh`](examples/noctalia-avatar-check.sh) | Diagnóstico del avatar (bash: guárdalo como fichero y ejecútalo) |
 
+## La CLI
+
+| Comando | Qué hace |
+|---|---|
+| `build <imagen>` | un PNG por forma + `manifest.json` |
+| `pick <imagen\|manifest.json>` | un emblema por stdout (para `icat`) |
+| `list` | las formas disponibles |
+| `doctor` | canvas, kitty, fastfetch, config y binario |
+| `install` | binario, configs y el greeting en fish (`--dry-run`, `--uninstall`, `--no-fish`) |
+| `update` | baja el último release y se reemplaza |
+| `bundle` | (mantenedor) arma `dist/` para publicar |
+| `version` | `kitty-shapes vX.Y.Z` |
+
+`update` se niega a correr desde el repo (`bun run`): no hay binario que
+reemplazar. En un binario instalado, si es propiedad de un paquete
+(`pacman -Qo`), dice que se actualiza con `b3l0w update` en vez de pelear
+con pacman.
+
 ## Instalación
 
-**Requisito**: `bun` **1.4 o superior**. Con bun 1.3 el `bun.lock` (formato v2)
-no se puede leer y se reescribe en cada instalación.
+**El binario no necesita Bun**: Skia va embebido. Bun solo hace falta para
+desarrollar.
 
-### Todo de una (instalador)
+### Desde el release (usuario final)
 
 ```bash
-./install.sh            # instala y deja el greeting andando
-./install.sh --dry-run  # muestra qué haría, sin tocar nada
+curl -fsSL https://github.com/Below-Z3R0/kitty-shapes/releases/latest/download/kitty-shapes.tar.gz | tar xz
+./kitty-shapes/kitty-shapes install --from ./kitty-shapes
+```
+
+O el binario suelto:
+
+```bash
+curl -fsSL .../releases/latest/download/kitty-shapes-linux-x64 -o kitty-shapes
+chmod +x kitty-shapes
+./kitty-shapes install --from .   # si tenés examples/ al lado
+```
+
+### Desde el repo (desarrollo)
+
+```bash
+./install.sh            # compila y delega en `kitty-shapes install`
+./install.sh --dry-run
 ./install.sh --uninstall
 ```
 
-Qué hace, en orden:
+`install.sh` es un bootstrap de 40 líneas: compila o baja el release y llama
+al subcomando `install`. La lógica vive en el CLI (una sola implementación).
+
+Qué hace `install`, en orden:
 
 | # | Paso | Resultado |
 |---|---|---|
-| 1 | comprueba `bun`, `fastfetch`, `kitty` | avisa cómo instalar lo que falte |
-| 2 | `bun install` + `typecheck` + `test` | 17 tests en verde |
-| 3 | compila el binario | `~/.config/fastfetch/kitty-shapes` |
-| 4 | copia el script del greeting | `~/.config/fastfetch/b3l0wz3r0-fastfetch` |
-| 5 | copia las 3 configs y la lista de formas | `~/.config/fastfetch/` |
-| 6 | engancha `fish_greeting` | `~/.config/fish/config.fish` |
-| 7 | verifica | el binario responde, el script es bash válido |
+| 1 | comprueba `fastfetch` y `kitty` | avisa cómo instalar lo que falte |
+| 2 | copia el binario | `~/.config/fastfetch/kitty-shapes` |
+| 3 | copia el script del greeting | `~/.config/fastfetch/b3l0wz3r0-fastfetch` |
+| 4 | copia las 3 configs y la lista de formas | solo si no existen |
+| 5 | engancha `fish_greeting` | `~/.config/fish/config.fish` |
+| 6 | verifica | el binario responde, el script es bash válido |
 
 **Nunca pisa tu configuración.** Las configs (`config*.jsonc`) y la lista de
-formas se crean solo si no existen: tus colores los sincroniza Noctalia y el
-instalador no los toca. Si la versión del repo difiere, te lo dice y te deja
-decidir. El script y el binario sí se actualizan, con backup automático
-(`<archivo>.bak-<fecha>`).
+formas se crean solo si no existen: tus colores los sincroniza Noctalia. El
+script y el binario sí se actualizan, con backup (`<archivo>.bak-<fecha>`).
 
 Es idempotente: podés ejecutarlo las veces que quieras.
 
@@ -88,11 +139,10 @@ Es idempotente: podés ejecutarlo las veces que quieras.
 
 ```bash
 bun install
-bun build --compile ./src/cli.ts --outfile ~/.local/bin/kitty-shapes
+bun build --compile ./src/cli/index.ts --outfile ~/.local/bin/kitty-shapes
 ```
 
 Única dependencia: `@napi-rs/canvas` (binarios precompilados, sin compilación).
-Para actualizar bun: `bun upgrade`.
 
 ## Uso
 
@@ -136,7 +186,7 @@ kitty-shapes pick osito.png --escape   # escribe la secuencia del protocolo grá
 ## Desarrollo
 
 ```bash
-bun test             # 17 tests: geometría, detección, cuantización
+bun test             # 25 tests: geometría, detección, cuantización y flags
 bun run typecheck    # tsc --noEmit (incluye tests/)
 ```
 
@@ -182,7 +232,7 @@ El recorrido completo está en [`docs/FLUJO.md`](docs/FLUJO.md) y los números e
 bun install
 
 # 2. El binario: sin runtime, sin transpilación en cada arranque
-bun build --compile ./src/cli.ts --outfile ~/.config/fastfetch/kitty-shapes
+bun build --compile ./src/cli/index.ts --outfile ~/.config/fastfetch/kitty-shapes
 
 # 3. La lista de formas (editable: una forma por línea)
 cp examples/emblem-shapes.txt ~/.config/fastfetch/emblem-shapes.txt
@@ -457,7 +507,7 @@ la forma y el arte se recorta contra ella. Con `--protect` el arte se recoloca
 bun test
 ```
 
-17 tests: la semántica de vértices de Material, la tangencia del arco, los
+25 tests: la semántica de vértices de Material, la tangencia del arco, los
 vértices cóncavos, que la escala sea uniforme, que `arch` ≠ `semiCircle`, y
 que la máscara de la forma no tenga agujeros (un bug real: el `%` de
 JavaScript sale negativo y los arcos giraban al revés).
