@@ -14,7 +14,9 @@ import { BUILDERS, NOTES } from "../shapes";
 import { parseArgs } from "./args";
 import { buildCommand } from "./build";
 import { cmdDoctor } from "./doctor";
+import { cmdInstall } from "./install";
 import { pickCommand } from "./pick";
+import { cmdUpdate } from "./update";
 import { USAGE } from "./usage";
 import { cmdVersion } from "./version";
 
@@ -47,6 +49,16 @@ async function main(): Promise<void> {
       return;
     case "doctor":
       process.exitCode = await cmdDoctor();
+      return;
+    case "install":
+      process.exitCode = cmdInstall(flags);
+      return;
+    case "uninstall":
+      flags.set("uninstall", "true");
+      process.exitCode = cmdInstall(flags);
+      return;
+    case "update":
+      process.exitCode = cmdUpdate();
       return;
     default:
       process.stderr.write(USAGE);

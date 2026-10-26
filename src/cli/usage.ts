@@ -1,6 +1,6 @@
 /** El texto de `--help`. */
 
-export const USAGE = `uso: kitty-shapes <build|pick|list|doctor|version> [opciones]
+export const USAGE = `uso: kitty-shapes <build|pick|list|doctor|install|update|version> [opciones]
 
   build <imagen>          un PNG por forma + manifest.json
   pick  <imagen>          un emblema por stdout (para icat)
@@ -8,6 +8,10 @@ export const USAGE = `uso: kitty-shapes <build|pick|list|doctor|version> [opcion
   list                    lista las formas disponibles
   doctor                  chequea el entorno (canvas, kitty, fastfetch, config)
   version                 imprime kitty-shapes vX.Y.Z
+  install                 instala binario, configs y el greeting en fish
+  install --dry-run       muestra qué haría, sin tocar nada
+  install --uninstall     revierte lo instalado (deja tu configuración)
+  update                  baja el último release y se reemplaza
 
 Salida de pick
   --path                  imprime la ruta del PNG
