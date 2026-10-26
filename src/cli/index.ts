@@ -13,6 +13,7 @@
 import { BUILDERS, NOTES } from "../shapes";
 import { parseArgs } from "./args";
 import { buildCommand } from "./build";
+import { cmdBundle } from "./bundle";
 import { cmdDoctor } from "./doctor";
 import { cmdInstall } from "./install";
 import { pickCommand } from "./pick";
@@ -59,6 +60,9 @@ async function main(): Promise<void> {
       return;
     case "update":
       process.exitCode = cmdUpdate();
+      return;
+    case "bundle":
+      process.exitCode = await cmdBundle(flags);
       return;
     default:
       process.stderr.write(USAGE);

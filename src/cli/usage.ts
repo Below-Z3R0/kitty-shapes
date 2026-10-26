@@ -1,6 +1,6 @@
 /** El texto de `--help`. */
 
-export const USAGE = `uso: kitty-shapes <build|pick|list|doctor|install|update|version> [opciones]
+export const USAGE = `uso: kitty-shapes <build|pick|list|doctor|install|update|bundle|version> [opciones]
 
   build <imagen>          un PNG por forma + manifest.json
   pick  <imagen>          un emblema por stdout (para icat)
@@ -12,6 +12,7 @@ export const USAGE = `uso: kitty-shapes <build|pick|list|doctor|install|update|v
   install --dry-run       muestra qué haría, sin tocar nada
   install --uninstall     revierte lo instalado (deja tu configuración)
   update                  baja el último release y se reemplaza
+  bundle                  (mantenedor) arma dist/ para el release
 
 Salida de pick
   --path                  imprime la ruta del PNG
