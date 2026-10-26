@@ -1,0 +1,129 @@
+{
+  "$schema": "https://github.com/fastfetch-cli/fastfetch/raw/dev/doc/json_schema.json",
+  "logo": {
+    "type": "kitty-direct",
+    "source": "~/.config/fastfetch/emblem/current.png",
+    "width": 40,
+    "padding": {
+      "top": 1,
+      "right": 0,
+      "left": 0
+    },
+    "color": {
+      "1": "#ebbc63",
+      "2": "#63cfd8"
+    }
+  },
+  "display": {
+    "color": {
+      "keys": "#ebbcba",
+      "title": "#9ccfd8"
+    },
+    "key": {
+      "width": 0
+    },
+    "separator": "  ",
+    "percent": {
+      "type": 9,
+      "color": {
+        "green": "#31748f",
+        "yellow": "#e99996",
+        "red": "#eb6f92"
+      }
+    }
+  },
+  "modules": [
+    "break",
+    {
+      "type": "title",
+      "format": "\u001b[1;38;2;224;222;244m{user-name}\u001b[0m\u001b[38;2;144;140;170m @ \u001b[0m\u001b[1;38;2;224;222;244m{host-name}\u001b[0m"
+    },
+    {
+      "type": "custom",
+      "format": "\u001b[38;2;235;194;186m■\u001b[0m \u001b[38;2;144;140;170mb3l0wz3r0 · ☠ · a hand-built CachyOS desktop\u001b[0m"
+    },
+    "break",
+    {
+      "type": "custom",
+      "format": "\u001b[38;2;235;194;186m──\u001b[0m \u001b[1;38;2;224;222;244mVITALS\u001b[0m \u001b[38;2;110;106;134m──────────────────────────────\u001b[0m"
+    },
+    {
+      "type": "cpu",
+      "key": "CPU"
+    },
+    {
+      "type": "gpu",
+      "key": "GPU",
+      "detectionMethod": "pci"
+    },
+    {
+      "type": "memory",
+      "key": "MEMORY"
+    },
+    {
+      "type": "disk",
+      "key": "DISK",
+      "folders": [
+        "/"
+      ]
+    },
+    "break",
+    {
+      "type": "custom",
+      "format": "\u001b[38;2;235;194;186m──\u001b[0m \u001b[1;38;2;224;222;244mSYSTEM\u001b[0m \u001b[38;2;110;106;134m───────────────────────────────\u001b[0m"
+    },
+    {
+      "type": "command",
+      "key": "OS",
+      "text": "echo \"CachyOS\""
+    },
+    {
+      "type": "kernel",
+      "key": "KERNEL"
+    },
+    {
+      "type": "command",
+      "key": "WM",
+      "text": "echo \"umbriel\""
+    },
+    {
+      "type": "command",
+      "key": "SHELL",
+      "text": "basename \"${SHELL:-unknown}\""
+    },
+    {
+      "type": "command",
+      "key": "DE",
+      "text": "echo \"noctalia\""
+    },
+    {
+      "type": "packages",
+      "key": "PKGS"
+    },
+    "break",
+    {
+      "type": "custom",
+      "format": "\u001b[38;2;235;194;186m──\u001b[0m \u001b[1;38;2;224;222;244mSESSION\u001b[0m \u001b[38;2;110;106;134m──────────────────────────────\u001b[0m"
+    },
+    {
+      "type": "uptime",
+      "key": "UPTIME"
+    },
+    {
+      "type": "command",
+      "key": "AGE",
+      "text": "echo $(( ($(date +%s) - $(stat -c %W /)) / 86400 )) days"
+    },
+    {
+      "type": "terminal",
+      "key": "TERM"
+    },
+    "break",
+    {
+      "type": "colors",
+      "symbol": "circle",
+      "paddingLeft": 2
+    },
+    "break"
+  ]
+}
