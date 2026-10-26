@@ -41,7 +41,9 @@ function download(): string {
   const out = join(tmpdir(), `kitty-shapes-${Date.now()}`);
   const url = `${UPDATE_URL}?cb=${Math.floor(Date.now() / 1000)}`;
   const proc = Bun.spawnSync({
-    cmd: ["curl", "-fsSL", url, "-o", out],
+    // --max-time: una red que no responde no puede dejar el update
+    // esperando para siempre.
+    cmd: ["curl", "-fsSL", "--connect-timeout", "15", "--max-time", "300", url, "-o", out],
     stdout: "pipe",
     stderr: "pipe",
   });
