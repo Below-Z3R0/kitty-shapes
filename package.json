@@ -3,11 +3,13 @@
   "version": "1.0.0",
   "type": "module",
   "bin": {
-    "kitty-shapes": "./src/cli.ts"
+    "kitty-shapes": "./src/cli/index.ts"
   },
   "scripts": {
-    "build": "bun run src/cli.ts build",
-    "pick": "bun run src/cli.ts pick",
+    "build": "bun run src/cli/index.ts build",
+    "pick": "bun run src/cli/index.ts pick",
+    "doctor": "bun run src/cli/index.ts doctor",
+    "version": "bun run src/cli/index.ts version",
     "test": "bun test",
     "typecheck": "tsc --noEmit",
     "install:all": "./install.sh"
