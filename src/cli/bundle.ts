@@ -5,7 +5,8 @@
  * docs) y empaqueta con tar reproducible: orden fijo, mtime fijo y
  * uid/gid 0, así el mismo commit da el mismo tar.
  *
- * No genera checksums: eso está pendiente por decisión del proyecto.
+ * No genera checksums: eso lo hace `sign-release.sh` de b3l0w-cli, que
+ * calcula el SHA256SUMS y lo firma con la clave de release.
  */
 
 import { existsSync, mkdirSync, rmSync } from "node:fs";
@@ -51,7 +52,19 @@ export async function cmdBundle(flags: Map<string, string>): Promise<number> {
 
     step("Compilando el binario");
     run(
-      [process.execPath, "build", join(root, "src/cli/index.ts"), "--compile", "--outfile", binary],
+      [
+        process.execPath,
+        "build",
+        join(root, "src/cli/index.ts"),
+        "--compile",
+        // @napi-rs/canvas trae Skia para gnu y para musl como dependencias
+        // opcionales, y Bun embebe las dos (32 MB + 29 MB). El target es
+        // glibc: la musl se deja afuera y el binario baja de 165 a 136 MB.
+        "--external",
+        "@napi-rs/canvas-linux-x64-musl",
+        "--outfile",
+        binary,
+      ],
       root,
     );
     ok(`binario: ${binary}`);

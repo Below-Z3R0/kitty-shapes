@@ -42,6 +42,11 @@ fi
 have bun || { echo "falta bun → https://bun.sh/install" >&2; exit 1; }
 
 bin="$(mktemp /tmp/kitty-shapes-XXXXXX)"
-bun build "$REPO_DIR/src/cli/index.ts" --compile --outfile "$bin" >/dev/null
+# Bun embebe las dos variantes de Skia (@napi-rs/canvas las trae como
+# opcionales): gnu (32 MB) y musl (29 MB). El target es glibc, así que la
+# musl se deja afuera con --external. El binario baja de 165 a 136 MB.
+bun build "$REPO_DIR/src/cli/index.ts" --compile \
+  --external @napi-rs/canvas-linux-x64-musl \
+  --outfile "$bin" >/dev/null
 "$bin" install --from "$REPO_DIR" "${@:1}"
 rm -f "$bin"

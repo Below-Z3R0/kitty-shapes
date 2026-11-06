@@ -139,10 +139,18 @@ Es idempotente: podés ejecutarlo las veces que quieras.
 
 ```bash
 bun install
-bun build --compile ./src/cli/index.ts --outfile ~/.local/bin/kitty-shapes
+bun build --compile ./src/cli/index.ts \
+  --external @napi-rs/canvas-linux-x64-musl \
+  --outfile ~/.local/bin/kitty-shapes
 ```
 
 Única dependencia: `@napi-rs/canvas` (binarios precompilados, sin compilación).
+
+**Por qué el `--external`:** `@napi-rs/canvas` trae Skia para gnu y para musl
+como dependencias opcionales, y Bun embebe **las dos** (32 MB + 29 MB). El
+target es glibc, así que la musl es peso muerto. Dejándola afuera, el binario
+baja de **165 a 136 MB** sin cambiar una sola salida. Los 136 MB son casi
+todos el runtime de Bun (~107 MB), que es el piso de `--compile`.
 
 ## Uso
 
@@ -232,7 +240,9 @@ El recorrido completo está en [`docs/FLUJO.md`](docs/FLUJO.md) y los números e
 bun install
 
 # 2. El binario: sin runtime, sin transpilación en cada arranque
-bun build --compile ./src/cli/index.ts --outfile ~/.config/fastfetch/kitty-shapes
+bun build --compile ./src/cli/index.ts \
+  --external @napi-rs/canvas-linux-x64-musl \
+  --outfile ~/.config/fastfetch/kitty-shapes
 
 # 3. La lista de formas (editable: una forma por línea)
 cp examples/emblem-shapes.txt ~/.config/fastfetch/emblem-shapes.txt
